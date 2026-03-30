@@ -8,6 +8,6 @@ GPIB-Measurement-Tool.layout
 #WINDOWS
 build/
 /.vscode
-third-party/boost_1_90_0
+third-party/boost_lib_include
 Examples/
 
