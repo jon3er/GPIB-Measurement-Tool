@@ -8,6 +8,6 @@ Test_GPIB_Terminal.layout
 #WINDOWS
 build/
 /.vscode
-third-party/
+third-party/boost_1_90_0
 Examples/
 
