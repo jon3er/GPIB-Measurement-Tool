@@ -31,8 +31,8 @@ THIRD_PARTY_DIR = third-party
 BOOST_INCLUDE = $(THIRD_PARTY_DIR)/boost_lib_include/boost_extracted
 
 # Mathplot
-MATHPLOT_SRC = $(THIRD_PARTY_DIR)/mathplot.cpp
-MATHPLOT_INCLUDE = $(THIRD_PARTY_DIR)
+MATHPLOT_SRC = $(THIRD_PARTY_DIR)/wxMathplots/mathplot.cpp
+MATHPLOT_INCLUDE = $(THIRD_PARTY_DIR)/wxMathplots
 
 # FTDI
 ifeq ($(OS),Windows_NT)
