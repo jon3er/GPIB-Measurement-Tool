@@ -2,9 +2,9 @@
 bin/
 obj/
 /LogFiles
-Test_GPIB_Terminal.cbp
-Test_GPIB_Terminal.depend
-Test_GPIB_Terminal.layout
+GPIB-Measurement-Tool.cbp
+GPIB-Measurement-Tool.depend
+GPIB-Measurement-Tool.layout
 #WINDOWS
 build/
 /.vscode

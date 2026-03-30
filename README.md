@@ -30,3 +30,12 @@ Damit der Prologix-Adapter ohne Root-Rechte angesprochen werden kann, muss eine 
 # Datei: /etc/udev/rules.d/99-ftdi.rules
 ATTRS{idVendor}=="0403", ATTRS{idProduct}=="6001", RUN+="/bin/sh -c 'echo $kernel > /sys/bus/usb/drivers/ftdi_sio/unbind'"
 SUBSYSTEM=="usb", ATTRS{idVendor}=="0403", ATTRS{idProduct}=="6001", GROUP="dialout", MODE="0660"
+```
+
+### 2. Boost Bibliotek
+Um die Boost Bibliotek zu nutzen muss diese entweder auf dem PC des endnutzers installiert werden oder die Bibliotek muss von https://www.boost.org/ heruntergeladen werden und in den thrid-party ordner entpackt abgelegt werden.
+
+ggf. mussen entsprechend änderungen an der CMakeList.txt, MakeFile oder an der Projekt Datei der IDE vorgenommen werden.
+
+### 3. Projekt Kompalieren
+Um Das Projeket zu kompalieren kann entweder die CMakeList.txt bei der verwendung von CMake benutzt werden oder wenn das Projekt in einer IDE geöffnet wird kann bsw. Bei der verwendung von der Code:Blocks IDE die MakeFile importiert werden die die nötwendigen Projekteinstellungen beinhaltet.
