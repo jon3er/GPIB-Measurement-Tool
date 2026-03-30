@@ -28,7 +28,7 @@ BUILD_DIR := $(BIN_DIR)
 THIRD_PARTY_DIR = third-party
 
 # Boost (header-only)
-BOOST_INCLUDE = $(THIRD_PARTY_DIR)/boost_1_90_0
+BOOST_INCLUDE = $(THIRD_PARTY_DIR)/boost_lib_include/boost_extracted
 
 # Mathplot
 MATHPLOT_SRC = $(THIRD_PARTY_DIR)/mathplot.cpp
