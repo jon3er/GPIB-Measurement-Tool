@@ -1,0 +1,85 @@
+#pragma once
+#include <wx/wx.h>
+#include <wx/spinctrl.h>
+#include <wx/valnum.h>
+#include "cmdGpib.h"
+#include "PlotterFrame.h"
+#include "dataManagement.h"
+#include "MSetDocument.h"
+
+class SettingsDialog : public wxDialog, public IMSetObserver {
+public:
+    SettingsDialog(wxWindow* parent, MeasurementMode mode, const sData::sParam* preset = nullptr);
+    ~SettingsDialog() override;
+
+    void SetDocument(MSetDocument* document);
+
+    // IMSetObserver
+    void OnDocumentChanged(const std::string& changeType) override;
+
+private:
+    MeasurementMode m_mode;
+    bool m_hasPreset = false;
+    sData::sParam m_preset{};
+    MSetDocument* m_document = nullptr;
+
+    // Gemeinsame Widgets (alle Modi)
+    wxTextCtrl* m_txtRefLevel      = nullptr;
+    wxSpinCtrl* m_spinAttenuation  = nullptr;
+    wxChoice*   m_choiceUnit       = nullptr;
+
+    // Sweep + MarkerPeak
+    wxTextCtrl* m_txtStartFreq     = nullptr;
+    wxTextCtrl* m_txtStopFreq      = nullptr;
+    wxTextCtrl* m_txtRBW           = nullptr;
+    wxTextCtrl* m_txtVBW           = nullptr;
+    wxChoice*   m_choiceDetector   = nullptr;
+
+    // Nur Sweep
+    wxChoice*   m_choiceSweepPoints = nullptr;
+
+    // Nur IQ
+    wxTextCtrl* m_txtCenterFreq    = nullptr;
+    wxChoice*   m_choiceFilterType = nullptr;
+    wxTextCtrl* m_txtSampleRate    = nullptr;
+    wxTextCtrl* m_txtRecordLength  = nullptr;
+    wxTextCtrl* m_txtIfBandwidth   = nullptr;
+    wxChoice*   m_choiceTriggerSource = nullptr;
+    wxChoice*   m_choiceTriggerSlope = nullptr;
+    wxTextCtrl* m_txtPretriggerSamples = nullptr;
+    wxTextCtrl* m_txtTriggerLevel  = nullptr;
+    wxTextCtrl* m_txtTriggerDelay  = nullptr;
+
+    // Options
+    wxCheckBox* m_useMultipoint = nullptr;
+
+    // Buttons
+    wxButton* m_btnStart = nullptr;
+    wxButton* m_btnGetCurrentSettings = nullptr;
+
+    // Event Handler
+    void OnApply(wxCommandEvent& event);
+    void OnStart(wxCommandEvent& event);
+    void OnGetCurrent(wxCommandEvent& event);
+
+    // Mode-spezifische Apply + Verifikation
+    void ApplySweep();
+    void ApplyIq();
+    void ApplyMarkerPeak();
+
+    // Constructor helper blocks
+    void SetDialogTitleForMode();
+    void BuildCommonFields(wxWindow* parent, wxFlexGridSizer* grid, wxFloatingPointValidator<double>& floatVal);
+    void BuildSweepMarkerFields(wxWindow* parent, wxFlexGridSizer* grid);
+    void BuildSweepFields(wxWindow* parent, wxFlexGridSizer* grid);
+    void BuildIqFields(wxWindow* parent, wxFlexGridSizer* grid, wxFloatingPointValidator<double>& floatVal);
+    void BuildBottomOptions(wxWindow* parent, wxFlexGridSizer* grid);
+    void BuildActionButtons(wxWindow* parent, wxBoxSizer* buttonSizer, wxButton*& btnApply, wxButton*& btnCancel);
+    void BindActionEvents(wxButton* btnApply);
+
+    void RefreshData();
+    void LoadPresetData();
+    wxString FormatFrequencyAutoUnit(double hz) const;
+    bool ParseFrequencyInputToHz(const wxString& input, double& hz) const;
+    bool ParseTimeInputToSeconds(const wxString& input, double& seconds) const;
+};

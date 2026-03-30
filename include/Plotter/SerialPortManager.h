@@ -1,0 +1,51 @@
+#ifndef SERIALPORTMANAGER_H
+#define SERIALPORTMANAGER_H
+
+#include <boost/asio.hpp>
+#include <vector>
+#include <string>
+#include <iostream>
+#include <filesystem>
+#include <chrono>
+#include <thread>
+
+#ifdef _WIN32
+    #include <windows.h>
+#else
+    #include <sys/ioctl.h>
+    #include <termios.h>
+#endif
+
+class SerialPortManager
+{
+    public:
+        SerialPortManager();
+        SerialPortManager& operator=(const SerialPortManager&) = default;
+        virtual ~SerialPortManager();
+
+        std::vector<std::string> ScanPorts();
+
+        bool OpenPort(const std::string& portName, unsigned int BaudRate = 115200);
+        void ClosePort();
+
+        bool IsOpen() const;
+
+        bool Write(const std::string& data);
+
+        void StartAsyncRead(std::function<void(const std::string&)> onLineRead);
+
+    protected:
+
+    private:
+        boost::asio::io_context m_ioContext;
+        boost::asio::serial_port m_serial;
+        void DoRead();
+        char m_readChar;
+        std::string m_inputBuffer;
+        std::function<void(const std::string&)> m_onLineRead;
+        std::thread m_ioThread;
+        boost::asio::executor_work_guard<boost::asio::io_context::executor_type> m_workGuard;
+
+};
+
+#endif // SERIALPORTMANAGER_H

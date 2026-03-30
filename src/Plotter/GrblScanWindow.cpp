@@ -1,0 +1,263 @@
+#include "GrblScanWindow.h"
+#include <algorithm>
+
+// IDs for events
+enum {
+    ID_BTN_START = 1001,
+    ID_BTN_CLOSE = 1002
+};
+
+wxBEGIN_EVENT_TABLE(GrblScanWindow, wxDialog)
+    EVT_BUTTON(ID_BTN_START, GrblScanWindow::OnStart)
+    EVT_BUTTON(ID_BTN_CLOSE, GrblScanWindow::OnBtnClose)
+    EVT_CLOSE(GrblScanWindow::OnClose)
+wxEND_EVENT_TABLE()
+
+GrblScanWindow::GrblScanWindow(wxWindow* parent, GrblController* controller, MeasurementDocument* document)
+    : wxDialog(parent, wxID_ANY, "Scanner Configuration", wxDefaultPosition, wxSize(450, 650)),
+    m_controller(controller),
+    m_document(document)
+{
+    auto* mainSizer = new wxBoxSizer(wxVERTICAL);
+    auto* formSizer = new wxFlexGridSizer(2, 5, 10); // 2 cols, 5px hgap, 10px vgap
+    formSizer->AddGrowableCol(1, 1);
+
+    // --- Input Helper ---
+    auto AddInput = [&](const wxString& label, wxTextCtrl*& ptr, const wxString& def) {
+        formSizer->Add(new wxStaticText(this, wxID_ANY, label), 0, wxALIGN_CENTER_VERTICAL);
+        ptr = new wxTextCtrl(this, wxID_ANY, def);
+        formSizer->Add(ptr, 1, wxEXPAND);
+    };
+
+    // 1. Create Fields
+    AddInput("Start X:", m_txtStartX, "0.0");
+    AddInput("Start Y:", m_txtStartY, "0.0");
+    AddInput("Rows:",    m_txtRows,   "5");
+    AddInput("Cols:",    m_txtCols,   "5");
+    AddInput("Step X:",  m_txtStepX,  "10.0");
+    AddInput("Step Y:",  m_txtStepY,  "10.0");
+    AddInput("Speed:",   m_txtSpeed,  "1000.0");
+
+    // 2. Direction
+    wxString choices[] = { "Horizontal", "Vertical" };
+    m_rbDirection = new wxRadioBox(this, wxID_ANY, "Direction", wxDefaultPosition, wxDefaultSize, 2, choices);
+
+    m_chkZigzag = new wxCheckBox(this, wxID_ANY, "Zigzag Mode (Snake Scan)");
+    m_chkZigzag->SetValue(true); // Default to on, it's faster
+
+    // 4. Buttons
+    auto* btnSizer = new wxBoxSizer(wxHORIZONTAL);
+    m_btnStart = new wxButton(this, ID_BTN_START, "Start Scan");
+    m_btnClose = new wxButton(this, ID_BTN_CLOSE, "Close");
+    btnSizer->Add(m_btnStart, 1, wxRIGHT, 5);
+    btnSizer->Add(m_btnClose, 0);
+
+    // Layout
+    mainSizer->Add(formSizer, 1, wxALL | wxEXPAND, 15);
+    mainSizer->Add(m_rbDirection, 0, wxLEFT | wxRIGHT | wxBOTTOM | wxEXPAND, 15);
+    mainSizer->Add(m_chkZigzag, 0, wxALL | wxEXPAND, 15);
+    mainSizer->Add(btnSizer, 0, wxALL | wxALIGN_RIGHT, 15);
+
+    SetSizer(mainSizer);
+    Layout();
+    CenterOnParent();
+}
+
+GrblScanWindow::~GrblScanWindow() {
+    // Ensure thread is joined if window is destroyed
+    if (m_workerThread.joinable()) {
+        m_workerThread.join();
+    }
+}
+
+void GrblScanWindow::ToggleControls(bool enable) {
+    m_txtStartX->Enable(enable);
+    m_txtStartY->Enable(enable);
+    m_txtRows->Enable(enable);
+    m_txtCols->Enable(enable);
+    m_txtStepX->Enable(enable);
+    m_txtStepY->Enable(enable);
+    m_txtSpeed->Enable(enable);
+    m_rbDirection->Enable(enable);
+    m_chkZigzag->Enable(enable);
+
+    if (enable) {
+        m_btnStart->Enable(true);
+    }
+}
+
+void GrblScanWindow::OnStart(wxCommandEvent& event) {
+    if (m_isScanning) {
+        m_controller->CancelScan();
+        m_btnStart->Disable();
+        m_btnStart->SetLabel("Stopping...");
+        return;
+    }
+
+    if (!m_document) {
+        wxMessageBox("No measurement document attached.", "Error");
+        return;
+    }
+
+    try {
+
+        if (m_workerThread.joinable()) {
+            m_workerThread.join();
+        }
+
+        double startX = std::stod(m_txtStartX->GetValue().ToStdString());
+        double startY = std::stod(m_txtStartY->GetValue().ToStdString());
+        int rows = std::stoi(m_txtRows->GetValue().ToStdString());
+        int cols = std::stoi(m_txtCols->GetValue().ToStdString());
+        double stepX = std::stod(m_txtStepX->GetValue().ToStdString());
+        double stepY = std::stod(m_txtStepY->GetValue().ToStdString());
+        double speed = std::stod(m_txtSpeed->GetValue().ToStdString());
+        Direction dir = (m_rbDirection->GetSelection() == 0) ? DIR_Horizontal : DIR_Vertical;
+        bool zigzag = m_chkZigzag->GetValue();
+
+        m_isScanning = true;
+        ToggleControls(false); // Disable inputs
+
+        m_btnStart->Enable(true);
+        m_btnStart->SetLabel("STOP SCAN"); // Change labe   
+
+
+        // ========================================= Setup Measuremnt ==============================================
+        // Set Parameter for mesurement
+        sData& currentData = m_document->GetResultsMutable();
+        sData::sParam *MessInfo = currentData.GetParameter();
+        MessInfo->File = "PlotterScan";
+        MessInfo->NoPoints_X = rows;
+        MessInfo->NoPoints_Y = cols;
+        bool isVertical;
+        wxString TypeSting;
+        // set Scan travel mode
+        if (zigzag == true)
+            TypeSting = "Continuous";
+        else
+            TypeSting = "Line";
+        currentData.setFileType(TypeSting);
+        // set scan direction
+        if (dir == DIR_Vertical)
+            isVertical = true;
+        else
+            isVertical = false;
+        currentData.setPlotterPositions(stepX, stepY, startX, startY, isVertical);
+
+        std::cout << "Start Measurement" << std::endl;
+
+        auto fsu = &fsuMeasurement::get_instance();
+        fsu->setNoPoints(rows, cols);
+        // ======================================== Setup Measuremnt Added =========================================
+
+        Layout();
+
+        m_workerThread = std::thread([=, this]() {
+
+            // This now respects the m_shouldCancel flag
+            m_controller->StartScanCycle(startX, startY, rows, cols, stepX, stepY,
+                [this, rows, cols](int r, int c, double x, double y) {
+
+                    // ======================= Added Measurement funciton ================================
+                    int measurementNumber = (r * cols + c) + 1 ;  // Korrekte Berechnung Messnummer beginnt mit 1 nicht 0!!!
+                    std::cout << "Mesurement number: " << measurementNumber << std::endl;
+
+                    bool success;
+                    
+                    try
+                    {   // Execute Main Measurement Function
+                        success = PlotterMeasurement(&m_document->GetResultsMutable(), measurementNumber);
+                    }
+                    catch (const std::exception& e) {
+                        // Hier holst du den Grund ab:
+                        std::cout << "Plotter Messung Error: " << e.what() << std::endl;
+                        success = false;
+                    }
+
+                    if (success)
+                    {
+                        sData& updatedData = m_document->GetResultsMutable();
+                        int xIndex = 0;
+                        int yIndex = 0;
+                        updatedData.getXYCord(xIndex, yIndex, measurementNumber);
+
+                        std::vector<double> yReal;
+                        try
+                        {
+                            yReal = updatedData.get3DDataReal(xIndex, yIndex);
+                        }
+                        catch (...)
+                        {
+                            yReal.clear();
+                        }
+                        
+                        std::vector<double> xAxis = updatedData.GetFreqStepVector();
+                        const size_t n = std::min(xAxis.size(), yReal.size());
+                        if (n > 0)
+                        {
+                            xAxis.resize(n);
+                            yReal.resize(n);
+                            // Marshal to main thread: SetXData/SetYData and notify must not run on worker thread.
+                            this->CallAfter([this, x = std::move(xAxis), y = std::move(yReal)]() mutable {
+                                if (!m_document) return;
+                                m_document->SetXData(x);
+                                m_document->SetYData(y);
+                                m_document->NotifyLiveDataUpdated();
+                            });
+                        }
+                        printf("Messung an Punkt R:%d C:%d erfolgreich beendet.\n", r, c);
+                        printf("Reached Point R:%d C:%d at (%.2f, %.2f)\n", r, c, x, y);
+                        return true;
+                    } 
+                    else
+                    {
+                        printf("FEHLER bei Messung an Punkt R:%d C:%d\n", r, c);
+                        return false;
+                    }
+
+                    // ====================================== End Added Measurement function ============================
+                },
+                dir, zigzag, speed
+            );
+
+            // Update UI when finished (or cancelled)
+            this->CallAfter([this]() {
+                m_isScanning = false;
+
+                // Restore UI state
+                m_btnStart->SetLabel("Start Scan");
+                ToggleControls(true); // Re-enables inputs and buttons
+                Layout();
+
+                // Optional: Check if it was a real finish or a cancel
+                // (You'd need a getter for m_shouldCancel if you want different messages)
+                wxMessageBox("Scan cycle ended. \nStatus: ", "Info");
+
+                // Notify AFTER the message box is dismissed so that the PlotWindow's
+                // RefreshFromDocument / PopulateSelectors runs on a clean event loop
+                // without interference from the modal's nested event loop.
+                if (m_document)
+                    m_document->NotifyDataUpdated();
+            });
+        });
+
+    } catch (...) {
+        wxMessageBox("Invalid input", "Error");
+    }
+}
+
+void GrblScanWindow::OnClose(wxCloseEvent& event) {
+    if (m_isScanning) {
+        if (event.CanVeto()) {
+            wxMessageBox("Cannot close while scanning is in progress.", "Busy");
+            event.Veto();
+            return;
+        }
+    }
+    // Proceed with destruction
+    Destroy();
+}
+
+void GrblScanWindow::OnBtnClose(wxCommandEvent& event) {
+    Close(); // Triggers OnClose
+}

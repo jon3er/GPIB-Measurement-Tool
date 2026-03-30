@@ -1,0 +1,21 @@
+#pragma once
+
+#include <iostream>
+#include <string>
+#include <vector>
+#include <thread>
+#include <atomic>
+#include <wx/wx.h>
+#include <wx/tokenzr.h>
+
+#include "dataManagement.h"
+#include "CsvManagement.h"
+#include "systemInfo.h"
+
+// Helper functions for komplex main functions
+
+bool PlotterMeasurement(sData* data, int mesurementNumber);
+
+wxString terminalTimestampOutput(wxString Text);
+
+void sleepMs(int timeMs);
