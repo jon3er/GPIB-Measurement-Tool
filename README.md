@@ -35,7 +35,7 @@ SUBSYSTEM=="usb", ATTRS{idVendor}=="0403", ATTRS{idProduct}=="6001", GROUP="dial
 ### 2. Boost Bibliotek
 Um die Boost Bibliotek zu nutzen muss diese entweder auf dem PC des endnutzers installiert werden oder die Bibliotek muss von https://www.boost.org/ heruntergeladen werden und in den thrid-party ordner entpackt abgelegt werden.
 
-Dies sollte in `thrid-party/boost_lib_include/boost_extracted´ erfolgen. Dabei muss der inhalt der Zip in boost_extracted kopiert werden bzw. der Dateiname entsprechend geändert werden.
+Dies sollte in `thrid-party/boost_lib_include/boost_extracted` erfolgen. Dabei muss der inhalt der Zip in boost_extracted kopiert werden bzw. der Dateiname entsprechend geändert werden.
 
 ### 3. Projekt Kompalieren
 Um Das Projeket zu kompalieren kann entweder die CMakeList.txt bei der verwendung von CMake benutzt werden oder wenn das Projekt in einer IDE geöffnet wird kann bsw. Bei der verwendung von der Code:Blocks IDE die MakeFile importiert werden die die nötwendigen Projekteinstellungen beinhaltet.
