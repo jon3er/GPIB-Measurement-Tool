@@ -31,11 +31,12 @@ Damit der Prologix-Adapter ohne Root-Rechte angesprochen werden kann, muss eine 
 ATTRS{idVendor}=="0403", ATTRS{idProduct}=="6001", RUN+="/bin/sh -c 'echo $kernel > /sys/bus/usb/drivers/ftdi_sio/unbind'"
 SUBSYSTEM=="usb", ATTRS{idVendor}=="0403", ATTRS{idProduct}=="6001", GROUP="dialout", MODE="0660"
 ```
+Falls das nicht funktioniert, kann alternativ `MODE="0666"` eingestellt werden. Dies erweitert die Rechtezuweisung jedoch.
+### 2. Boost-Bibliothek
 
-### 2. Boost Bibliotek
-Um die Boost Bibliotek zu nutzen muss diese entweder auf dem PC des endnutzers installiert werden oder die Bibliotek muss von https://www.boost.org/ heruntergeladen werden und in den thrid-party ordner entpackt abgelegt werden.
+Um die Boost-Bibliothek zu nutzen, muss diese entweder auf dem PC des Endnutzers installiert werden, oder die Bibliothek muss von https://www.boost.org/ heruntergeladen und entpackt in dem third-party-Ordner abgelegt werden.
 
-ggf. mussen entsprechend änderungen an der CMakeList.txt, MakeFile oder an der Projekt Datei der IDE vorgenommen werden.
+Dies sollte in `third-party/boost_lib_include/boost_extracted` erfolgen. Dabei muss der Inhalt der ZIP-Datei in `boost_extracted` kopiert bzw. der Dateiname entsprechend geändert werden.
+### 3. Projekt kompilieren
 
-### 3. Projekt Kompalieren
-Um Das Projeket zu kompalieren kann entweder die CMakeList.txt bei der verwendung von CMake benutzt werden oder wenn das Projekt in einer IDE geöffnet wird kann bsw. Bei der verwendung von der Code:Blocks IDE die MakeFile importiert werden die die nötwendigen Projekteinstellungen beinhaltet.
+Um das Projekt zu kompilieren, kann entweder die `CMakeLists.txt` bei der Verwendung von CMake benutzt werden, oder wenn das Projekt in einer IDE geöffnet wird kann beispielsweise bei der Verwendung der Code::Blocks-IDE die `Makefile` importiert werden, welches die notwendigen Projekteinstellungen beinhaltet.
