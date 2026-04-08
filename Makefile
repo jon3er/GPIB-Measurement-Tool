@@ -1,11 +1,11 @@
-# Makefile for TEST-GPIB-Terminal
+# Makefile for GPIB-Measurement-Tool
 # Generated from CMakeLists.txt for IDE usage
 
 # ============================================================================
 # Project Configuration
 # ============================================================================
-PROJECT_NAME ?= TEST-GPIB-Terminal
-VERSION ?= 0.2
+PROJECT_NAME ?= GPIB-Measurement-Tool
+VERSION ?= 1.0
 
 # Compiler and flags
 CXX ?= g++
@@ -29,6 +29,11 @@ THIRD_PARTY_DIR = third-party
 
 # Boost (header-only)
 BOOST_INCLUDE = $(THIRD_PARTY_DIR)/boost_lib_include/boost_extracted
+BOOST_ASIO_HEADER = $(BOOST_INCLUDE)/boost/asio.hpp
+
+ifeq ($(wildcard $(BOOST_ASIO_HEADER)),)
+$(error Boost not found at $(BOOST_ASIO_HEADER). Please extract Boost to third-party/boost_lib_include/boost_extracted)
+endif
 
 # Mathplot
 MATHPLOT_SRC = $(THIRD_PARTY_DIR)/wxMathplots/mathplot.cpp
@@ -41,6 +46,9 @@ ifeq ($(OS),Windows_NT)
 else
     FTDI_INCLUDE = /usr/include
     FTDI_LIB = -lftd2xx
+	ifeq ($(wildcard $(FTDI_INCLUDE)/ftd2xx.h),)
+$(error FTDI header not found at $(FTDI_INCLUDE)/ftd2xx.h)
+	endif
 endif
 
 # Output executable
@@ -62,17 +70,6 @@ INCLUDES = -I$(INCLUDE_DIR) \
            -I$(INCLUDE_DIR)/gui/TerminalWindow \
            -I$(INCLUDE_DIR)/hardware \
            -I$(INCLUDE_DIR)/Plotter \
-           -I$(SRC_DIR) \
-           -I$(SRC_DIR)/data \
-           -I$(SRC_DIR)/gui \
-           -I$(SRC_DIR)/gui/FunctionWindow \
-           -I$(SRC_DIR)/gui/helpTab \
-           -I$(SRC_DIR)/gui/MesurementWindow \
-           -I$(SRC_DIR)/gui/MesurementWindow/InputDialog \
-           -I$(SRC_DIR)/gui/SettingsWindow \
-           -I$(SRC_DIR)/gui/TerminalWindow \
-           -I$(SRC_DIR)/hardware \
-           -I$(SRC_DIR)/Plotter \
            -I$(MATHPLOT_INCLUDE) \
            -I$(BOOST_INCLUDE) \
            -I$(FTDI_INCLUDE) \

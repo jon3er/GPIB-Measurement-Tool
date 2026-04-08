@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.15)
-project(TEST-GPIB-Terminal VERSION 0.2)
+project(GPIB-Measurement-Tool VERSION 1.0)
 
 cmake_policy(SET CMP0003 NEW) # Linker Pfade
 if(POLICY CMP0167)
@@ -33,20 +33,20 @@ set(VCPKG_APPLOCAL_DEPS ON CACHE BOOL "")
 # supress mathplot warnings
 
 # 3. Sources (mathplot only, exclude boost library)
-file(GLOB_RECURSE SOURCE_FILES CONFIGURE_DEPENDS "src/**/*.cpp" "third-party/mathplot.cpp")
+file(GLOB_RECURSE SOURCE_FILES CONFIGURE_DEPENDS "src/**/*.cpp" "third-party/wxMathplots/mathplot.cpp")
 
-add_executable(TEST-GPIB-Terminal ${SOURCE_FILES})
+add_executable(GPIB-Measurement-Tool ${SOURCE_FILES})
 if(WIN32)
-    set_target_properties(TEST-GPIB-Terminal PROPERTIES WIN32_EXECUTABLE YES)
+    set_target_properties(GPIB-Measurement-Tool PROPERTIES WIN32_EXECUTABLE YES)
 endif()
 
 # --- 6. Präprozessor-Fixes ---
-target_compile_definitions(TEST-GPIB-Terminal PRIVATE 
+target_compile_definitions(GPIB-Measurement-Tool PRIVATE 
     wxUSE_GUI=1
 )
 
 if(WIN32)
-    target_compile_definitions(TEST-GPIB-Terminal PRIVATE 
+    target_compile_definitions(GPIB-Measurement-Tool PRIVATE 
         WXUSINGDLL
         _WIN32_WINNT=0x0A00 # Fix fuer Boost: Ziel Windows 10
         _CRT_SECURE_NO_WARNINGS
@@ -55,16 +55,16 @@ endif()
 
 # Suppress mathplot C4996 warnings (SetStyle)
 if(MSVC)
-    target_compile_options(TEST-GPIB-Terminal PRIVATE /wd4996)
+    target_compile_options(GPIB-Measurement-Tool PRIVATE /wd4996)
 endif()
 
 # 4. Linking & Includes
-target_link_libraries(TEST-GPIB-Terminal PRIVATE 
+target_link_libraries(GPIB-Measurement-Tool PRIVATE 
     ${wxWidgets_LIBRARIES} 
     ${FTDI_LIBRARY}
 )
 
-target_include_directories(TEST-GPIB-Terminal PRIVATE 
+target_include_directories(GPIB-Measurement-Tool PRIVATE 
     "include"
     "include/data"
     "include/gui"
@@ -84,3 +84,17 @@ target_include_directories(TEST-GPIB-Terminal PRIVATE
 
 # 5. Automatischer DLL-Export (vcpkg Feature)
 set(VCPKG_APPLOCAL_DEPS ON)
+
+# 6. Convenience targets to mirror Makefile usage
+add_custom_target(run
+    COMMAND $<TARGET_FILE:GPIB-Measurement-Tool>
+    DEPENDS GPIB-Measurement-Tool
+    WORKING_DIRECTORY $<TARGET_FILE_DIR:GPIB-Measurement-Tool>
+    COMMENT "Run GPIB-Measurement-Tool"
+)
+
+add_custom_target(rebuild
+    COMMAND ${CMAKE_COMMAND} --build "${CMAKE_BINARY_DIR}" --target clean
+    COMMAND ${CMAKE_COMMAND} --build "${CMAKE_BINARY_DIR}" --target GPIB-Measurement-Tool
+    COMMENT "Clean and rebuild GPIB-Measurement-Tool"
+)
