@@ -288,6 +288,7 @@ void MainProgrammWin::ButtonRefresh(wxCommandEvent& event)
         {
             Text = "Device Found";
             adapter.config();
+            adapter.resetGpibBusBuffer();
         }
         m_textCtrlDeviceStatus->SetValue(Text);
     }

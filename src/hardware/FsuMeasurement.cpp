@@ -102,7 +102,7 @@ bool fsuMeasurement::executeMeasurement(int TimeOutMs)
     case MeasurementMode::IQ:
         adapter.write("INST:SEL SAN");
         adapter.write("TRAC:IQ:STAT ON");
-        adapter.write("INIT:CONT OFF");
+        // adapter.write("INIT:CONT OFF"); // check why it tells me 
         adapter.write("INIT:IMM");
         adapter.write("*WAI");          // wait for measurement to finish
         adapter.write("TRAC:IQ:DATA?");
@@ -123,7 +123,7 @@ bool fsuMeasurement::executeMeasurement(int TimeOutMs)
             if (TimeOutMs <= TimePassed)
             {
                 setErrorMessage("IQ: timeout while receiving data");
-                adapter.write("INIT:CONT ON"); // turn on continous measurement
+                // adapter.write("INIT:CONT ON"); // turn on continous measurement
                 adapter.write("++auto 1");
                 return false;
             }
@@ -192,9 +192,6 @@ bool fsuMeasurement::executeMeasurement(int TimeOutMs)
         return false;
         break;
     }
-
-    adapter.write("INIT:CONT ON"); // turn on continous measurement
-    adapter.write("++auto 1");
 
     seperateDataBlock(commaSeparatedValues, m_x_Data, m_y_Data); // Separates the values and passes them to the internal data storage
 
