@@ -10,6 +10,14 @@
 // defines path for linux and windows systems
 namespace System
 {
+    inline wxString EnsureTrailingSeparator(const wxString& path)
+    {
+        const wxString sep(1, wxFileName::GetPathSeparator());
+        if (path.EndsWith(sep))
+            return path;
+        return path + sep;
+    }
+
     /**
      * Get the project root directory based on the current working directory or executable location.
      * This ensures cross-platform compatibility.
@@ -25,11 +33,11 @@ namespace System
             wxFileName path(cwd + wxFileName::GetPathSeparator());
             path.RemoveLastDir();  // Remove Debug/Release
             path.RemoveLastDir();  // Remove build
-            return path.GetFullPath() + wxFileName::GetPathSeparator();
+            return EnsureTrailingSeparator(path.GetFullPath());
         }
         
         // Otherwise assume cwd is already the project root
-        return cwd + wxFileName::GetPathSeparator();
+        return EnsureTrailingSeparator(cwd);
     }
 
     inline wxString filePathRoot = GetProjectRoot();
