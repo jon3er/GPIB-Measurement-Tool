@@ -233,6 +233,8 @@ void FunctionDocument::TestSaveFile()
             std::cerr << "Failed to save file" << std::endl;
     }
 
+    std::cout << "saving to: " << Dateiname << std::endl; 
+
     csvFile1.readCsvFile(Dateiname, TestObjekt2);
 
     wxString Dateiname2 = System::filePathRoot + "LogFiles" + System::fileSystemSlash + "TestCSVNeuKopie";
