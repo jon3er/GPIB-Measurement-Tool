@@ -40,6 +40,7 @@ bool CsvFile::saveCsvFile(wxString& filename, sData& data, int mesurementNumb)
         if (!file.Exists())
         {
             file.Create();
+            std::cout << "File created: " << filename << std::endl;
         }
         else
         {
