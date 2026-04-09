@@ -178,7 +178,7 @@ public:
     std::vector<double> get3DDataImag(int x, int y) const;
 
     // helper methodes
-    void resize3DData(int x, int y, int Anzahl) { m_Real3D.resize(x, y, Anzahl); m_Imag3D.resize(x, y, Anzahl); };
+    void resize3DData(int x, int y, int Anzahl);
 
     /**
      * @brief gets x, y Coodinates for current mesurement number

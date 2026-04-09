@@ -194,6 +194,7 @@ void sData::applyFsuSettingsToParam()
             m_dsParam->triggerSource = s.triggerSource;
             m_dsParam->triggerLevel  = s.triggerLevel;
             m_dsParam->triggerDelay  = s.triggerDelay;
+            m_dsParam->NoPoints_Array = s.recordLength;
             break;
         }
         case MeasurementMode::MARKER_PEAK:
@@ -217,6 +218,16 @@ void sData::applyFsuSettingsToParam()
             m_dsParam->costumFile = m_fsuSettings.costumFile.ToStdString();
             break;
     }
+}
+
+void sData::resize3DData(int x, int y, int Anzahl)
+{
+    m_dsParam->NoPoints_X = std::max(0, x);
+    m_dsParam->NoPoints_Y = std::max(0, y);
+    m_dsParam->NoPoints_Array = std::max(0, Anzahl);
+
+    m_Real3D.resize(m_dsParam->NoPoints_X, m_dsParam->NoPoints_Y, m_dsParam->NoPoints_Array);
+    m_Imag3D.resize(m_dsParam->NoPoints_X, m_dsParam->NoPoints_Y, m_dsParam->NoPoints_Array);
 }
 
 
