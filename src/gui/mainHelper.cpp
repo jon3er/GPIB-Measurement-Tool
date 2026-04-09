@@ -90,7 +90,8 @@ bool PlotterMeasurement(sData* data, int measurementNumber)
 
     if(!csvFile.saveCsvFile(fileName, *data, measurementNumber))
     {
-        std::cout << "[Error] Failed to save data to CSV file" << std::endl;
+        std::cout << "[Error] Failed to save data to CSV file" << std::endl;       
+        std::cout << "tryed to save file: " << fileName << std::endl;
     }
 
     std::cout << "Measuremnt done" << std::endl;

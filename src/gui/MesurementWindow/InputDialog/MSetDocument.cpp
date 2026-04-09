@@ -1,10 +1,40 @@
 #include "MSetDocument.h"
 #include "mainHelper.h"
 #include <algorithm>
+#include <cctype>
 #include <cmath>
 #include <sstream>
 
 #include "fkt_d2xx.h"
+
+namespace {
+std::string trimCopy(const std::string& value)
+{
+    const std::string whitespace = " \n\r\t";
+    const size_t first = value.find_first_not_of(whitespace);
+    if (first == std::string::npos)
+    {
+        return "";
+    }
+
+    const size_t last = value.find_last_not_of(whitespace);
+    return value.substr(first, last - first + 1);
+}
+
+bool waitForOperationComplete(PrologixUsbGpibAdapter& adapter, int timeoutMs = 250, int retries = 8)
+{
+    for (int attempt = 0; attempt < retries; ++attempt)
+    {
+        const std::string response = trimCopy(adapter.send("*OPC?", timeoutMs));
+        if (response == "1")
+        {
+            return true;
+        }
+    }
+
+    return false;
+}
+}
 
 MSetDocument::MSetDocument(PrologixUsbGpibAdapter& adapter, fsuMeasurement& fsu, MeasurementMode mode)
     : m_adapter(adapter)
@@ -132,8 +162,12 @@ bool MSetDocument::ApplySweep(const fsuMeasurement::lastSweepSettings& settings)
         SetResult(false, false, "Fehler beim Senden der Einstellungen!");
         return false;
     }
-    // wait for settings to apply before reading back
-    sleepMs(150);
+
+    if (!waitForOperationComplete(m_adapter))
+    {
+        SetResult(false, false, "Timeout beim Anwenden der Sweep-Einstellungen am Messgeraet.");
+        return false;
+    }
 
     if (!m_fsu.readSweepSettings())
     {
@@ -223,7 +257,11 @@ bool MSetDocument::ApplyIq(const fsuMeasurement::IqSettings& settings)
         return false;
     }
 
-    sleepMs(150);
+    if (!waitForOperationComplete(m_adapter))
+    {
+        SetResult(false, false, "Timeout beim Anwenden der IQ-Einstellungen am Messgeraet.");
+        return false;
+    }
 
     if (!m_fsu.readIqSettings())
     {
@@ -309,7 +347,11 @@ bool MSetDocument::ApplyMarkerPeak(const fsuMeasurement::MarkerPeakSettings& set
         return false;
     }
 
-    sleepMs(150);
+    if (!waitForOperationComplete(m_adapter))
+    {
+        SetResult(false, false, "Timeout beim Anwenden der MarkerPeak-Einstellungen am Messgeraet.");
+        return false;
+    }
 
     if (!m_fsu.readMarkerPeakSettings())
     {

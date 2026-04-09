@@ -35,10 +35,17 @@ namespace System
             path.RemoveLastDir();  // Remove build
             return EnsureTrailingSeparator(path.GetFullPath());
         }
+        else if (cwd.EndsWith("build"))
+        {
+            wxFileName path(cwd + wxFileName::GetPathSeparator());
+            path.RemoveLastDir();  // Remove build
+            return path.GetFullPath();
+        }
         
         // Otherwise assume cwd is already the project root
         return EnsureTrailingSeparator(cwd);
     }
+
 
     inline wxString filePathRoot = GetProjectRoot();
     inline wxString filePathSystem = GetProjectRoot() + "GpibScripts" + wxFileName::GetPathSeparator();

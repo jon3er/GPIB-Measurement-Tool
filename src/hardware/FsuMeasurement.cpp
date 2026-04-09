@@ -457,6 +457,9 @@ std::string blockCmd = scpiSetCommands.at(ScpiCommand::START_FREQUENCY   )   + s
     {
         return false;
     }
+    // Wait for settings to apply before reading back
+    //PrologixUsbGpibAdapter::get_instance().write("*WAI");
+
 }
 bool fsuMeasurement::readSweepSettings()
 {
