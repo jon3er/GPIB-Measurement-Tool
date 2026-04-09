@@ -275,6 +275,18 @@ bool MSetDocument::ApplyMarkerPeak(const fsuMeasurement::MarkerPeakSettings& set
         SetResult(false, false, "Stopfrequenz ausserhalb des Bereichs (0 - 26.5 GHz)!");
         return false;
     }
+    if (!m_fsu.checkIfSettingsValid(ScpiCommand::START_FREQUENCY, settings.targetFreq))
+    {
+        SetResult(false, false, "Target-Frequenz ausserhalb des Bereichs (0 - 26.5 GHz)!");
+        return false;
+    }
+    const double minFreq = std::min(settings.startFreq, settings.stopFreq);
+    const double maxFreq = std::max(settings.startFreq, settings.stopFreq);
+    if (settings.targetFreq < minFreq || settings.targetFreq > maxFreq)
+    {
+        SetResult(false, false, "Target-Frequenz muss innerhalb Start/Stop liegen!");
+        return false;
+    }
     if (!m_fsu.checkIfSettingsValid(ScpiCommand::RF_ATTENUATION, settings.att))
     {
         SetResult(false, false, "Daempfung muss in 5-dB Schritten erfolgen (0-75 dB)!");
@@ -306,6 +318,7 @@ bool MSetDocument::ApplyMarkerPeak(const fsuMeasurement::MarkerPeakSettings& set
     }
 
     m_marker = m_fsu.returnMarkerPeakSettings();
+    m_marker.targetFreq = settings.targetFreq;
 
     std::string mismatches;
     bool ok = true;

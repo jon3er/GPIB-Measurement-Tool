@@ -182,6 +182,7 @@ public:
     {
         double startFreq = 10'000'000;
         double stopFreq = 50'000'000;
+        double targetFreq = 30'000'000;
         double refLevel = 0;
         int att = 0;
         std::string unit = "DBM";

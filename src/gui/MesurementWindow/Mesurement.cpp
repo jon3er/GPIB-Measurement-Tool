@@ -739,6 +739,7 @@ void PlotWindow::UpdateSettingsPanel()
             info += "Mode:\t\tMarker Peak\n";
             info += wxString::Format("Start Freq:\t%g Hz\n", s.startFreq);
             info += wxString::Format("Stop Freq:\t%g Hz\n", s.stopFreq);
+            info += wxString::Format("Target Freq:\t%g Hz\n", s.targetFreq);
             info += wxString::Format("Ref Level:\t%g dBm\n", s.refLevel);
             info += wxString::Format("Attenuation:\t%d dB\n", s.att);
             info += wxString::Format("Unit:\t\t%s\n", s.unit.c_str());

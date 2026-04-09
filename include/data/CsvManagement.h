@@ -142,6 +142,7 @@ struct HeaderConfig
     // Frequenz Parameter
     static constexpr std::string_view startFreq     = "Start Frequency";        // ScpiCmdLookup.at(ScpiCmd::FREQ_STAR)
     static constexpr std::string_view endFreq       = "End Frequency";          // ScpiCmdLookup.at(ScpiCmd::FREQ_STOP)
+    static constexpr std::string_view targetFreq    = "Target Frequency";
     // Amplitude und Pegel-Parameter
     static constexpr std::string_view refPegel      = "Referenz Pegel";         // ScpiCmdLookup.at(ScpiCmd::DISP_TRAC_Y_RLEV)
     static constexpr std::string_view HFDaempfung   = "HF-Daempfung";            // ScpiCmdLookup.at(ScpiCmd::DISP_TRAC_Y_OFFS)

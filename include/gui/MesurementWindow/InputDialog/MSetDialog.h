@@ -31,6 +31,7 @@ private:
     // Sweep + MarkerPeak
     wxTextCtrl* m_txtStartFreq     = nullptr;
     wxTextCtrl* m_txtStopFreq      = nullptr;
+    wxTextCtrl* m_txtTargetFreq    = nullptr;
     wxTextCtrl* m_txtRBW           = nullptr;
     wxTextCtrl* m_txtVBW           = nullptr;
     wxChoice*   m_choiceDetector   = nullptr;

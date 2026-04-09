@@ -5,6 +5,7 @@
 
 #include <cctype>
 #include <algorithm>
+#include <cmath>
 
 namespace {
 bool startsWith(const std::string& value, const std::string& prefix)
@@ -75,9 +76,6 @@ bool fsuMeasurement::executeMeasurement(int TimeOutMs)
         if (!adapter.checkIfMsgAvailable(checkTimeoutMs))
         {
             setErrorMessage("Sweep Measurement Timeout waiting for MAV");
-            adapter.write("INIT:CONT ON"); // turn on continous measurement
-            adapter.write("++auto 1");
-            return false;
         }
 
         adapter.write("++read eoi");
@@ -115,9 +113,6 @@ bool fsuMeasurement::executeMeasurement(int TimeOutMs)
         if (!adapter.checkIfMsgAvailable(checkTimeoutMs))
         {
             setErrorMessage("IQ Measurement Timeout waiting for MAV");
-            adapter.write("INIT:CONT ON"); // turn on continous measurement
-            adapter.write("++auto 1");
-            return false;
         }
 
         adapter.write("++read eoi");
@@ -139,11 +134,27 @@ bool fsuMeasurement::executeMeasurement(int TimeOutMs)
         break;
 
     case MeasurementMode::MARKER_PEAK:
-        //adapter.write("++auto 1");
-        adapter.write("INIT:CONT OFF;INIT;*WAI");          // wait for measurement to finishCALC:MARK1:X?;Y?
+        adapter.write("INIT:CONT OFF"); // turn off continous measurement
+        adapter.write("INIT:IMM");
+        adapter.write("*WAI");          // wait for measurement to finish
         adapter.write("CALC:MARK1:ON");
-        adapter.write("CALC:MARK1:MAX");        // TODO make type of marker selectable MIN / MAX
-        std::cout << "Marker Measurement Triggered!" << std::endl;
+
+        // if Set Frequenzy out if range set it to the min frequenzy
+        {
+            const double minFreq = std::min(m_lastMarkerPeakSettings.startFreq, m_lastMarkerPeakSettings.stopFreq);
+            const double maxFreq = std::max(m_lastMarkerPeakSettings.startFreq, m_lastMarkerPeakSettings.stopFreq);
+            double targetFreq = m_lastMarkerPeakSettings.targetFreq;
+
+            if (!std::isfinite(targetFreq) || targetFreq < minFreq || targetFreq > maxFreq)
+            {
+                targetFreq = minFreq;
+                m_lastMarkerPeakSettings.targetFreq = targetFreq;
+            }
+
+            adapter.write("CALC:MARK1:X " + std::format("{}", targetFreq));
+            std::cout << "Marker Measurement Triggered at target frequency: " << targetFreq << " Hz" << std::endl;
+        }
+
         adapter.write("CALC:MARK1:X?;Y?");
 
         sleepMs(ProzessingTimeMs);
@@ -151,13 +162,10 @@ bool fsuMeasurement::executeMeasurement(int TimeOutMs)
         if (!adapter.checkIfMsgAvailable(checkTimeoutMs))
         {
             setErrorMessage("Marker Measurement Timeout waiting for MAV");
-            adapter.write("INIT:CONT ON"); // turn on continous measurement
-            adapter.write("++auto 1");
-            return false;
         }
 
         adapter.write("++read eoi");
-
+        // 
         while (adapter.quaryBuffer() < 1) // 18 bytes per data point
         {
             sleepMs(WaitTimeMs);
@@ -594,6 +602,8 @@ bool fsuMeasurement::readIqSettings()
 
 bool fsuMeasurement::writeMarkerPeakSettings(MarkerPeakSettings settings)
 {
+    m_lastMarkerPeakSettings = settings;
+
     std::string blockCmd = scpiSetCommands.at(ScpiCommand::START_FREQUENCY)  + std::format("{}",settings.startFreq) + ";:" +
                            scpiSetCommands.at(ScpiCommand::END_FREQUENCY)    + std::format("{}",settings.stopFreq)  + ";:" +
                            scpiSetCommands.at(ScpiCommand::REF_LEVEL)        + std::format("{}",settings.refLevel)  + ";:" +
@@ -649,6 +659,16 @@ bool fsuMeasurement::readMarkerPeakSettings()
         m_lastMarkerPeakSettings.rbw       = std::stod(tokens[5]);
         m_lastMarkerPeakSettings.vbw       = std::stod(tokens[6]);
         m_lastMarkerPeakSettings.detector  = tokens[7];
+
+        const double minFreq = std::min(m_lastMarkerPeakSettings.startFreq, m_lastMarkerPeakSettings.stopFreq);
+        const double maxFreq = std::max(m_lastMarkerPeakSettings.startFreq, m_lastMarkerPeakSettings.stopFreq);
+        if (!std::isfinite(m_lastMarkerPeakSettings.targetFreq)
+            || m_lastMarkerPeakSettings.targetFreq < minFreq
+            || m_lastMarkerPeakSettings.targetFreq > maxFreq)
+        {
+            m_lastMarkerPeakSettings.targetFreq = minFreq;
+        }
+
         return true;
     }
     catch (const std::exception& e) {

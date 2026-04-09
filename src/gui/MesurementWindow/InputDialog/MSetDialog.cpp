@@ -54,6 +54,13 @@ void SettingsDialog::BuildSweepMarkerFields(wxWindow* parent, wxFlexGridSizer* g
     m_txtStopFreq->SetToolTip("Zulaessiger Bereich: 0 bis 26.5 GHz (auch z. B. 2e6, 2 MHz, 0.2 GHz)");
     grid->Add(m_txtStopFreq, 1, wxEXPAND);
 
+    if (m_mode == MeasurementMode::MARKER_PEAK) {
+        grid->Add(new wxStaticText(parent, wxID_ANY, "Target Frequenz (Hz):"), 0, wxALIGN_CENTER_VERTICAL);
+        m_txtTargetFreq = new wxTextCtrl(parent, wxID_ANY, "1000000");
+        m_txtTargetFreq->SetToolTip("Marker-Zielfrequenz innerhalb Start/Stop (z. B. 1e6, 1 MHz, 0.001 GHz)");
+        grid->Add(m_txtTargetFreq, 1, wxEXPAND);
+    }
+
     grid->Add(new wxStaticText(parent, wxID_ANY, "RBW (Hz):"), 0, wxALIGN_CENTER_VERTICAL);
     m_txtRBW = new wxTextCtrl(parent, wxID_ANY, "10000");
     m_txtRBW->SetToolTip("Zulaessiger Bereich: 1 Hz bis 50 MHz (z. B. 10000, 10 kHz, 0.01 MHz)");
@@ -374,12 +381,15 @@ void SettingsDialog::ApplyMarkerPeak() {
     if (!m_document)
         return;
 
-    double startFreq, stopFreq, refLevel, rbw, vbw;
+    double startFreq, stopFreq, targetFreq, refLevel, rbw, vbw;
     if (!ParseFrequencyInputToHz(m_txtStartFreq->GetValue(), startFreq)) {
         wxMessageBox("Startfrequenz ungueltig! Beispiele: 1000000, 1 MHz, 1.5GHz", "Validierungsfehler", wxOK | wxICON_ERROR); return;
     }
     if (!ParseFrequencyInputToHz(m_txtStopFreq->GetValue(), stopFreq)) {
         wxMessageBox("Stopfrequenz ungueltig! Beispiele: 2000000, 2 MHz, 2.5GHz", "Validierungsfehler", wxOK | wxICON_ERROR); return;
+    }
+    if (!m_txtTargetFreq || !ParseFrequencyInputToHz(m_txtTargetFreq->GetValue(), targetFreq)) {
+        wxMessageBox("Target Frequenz ungueltig! Beispiele: 1000000, 1 MHz, 1.5GHz", "Validierungsfehler", wxOK | wxICON_ERROR); return;
     }
     m_txtRefLevel->GetValue().ToDouble(&refLevel);
     if (!ParseFrequencyInputToHz(m_txtRBW->GetValue(), rbw)) {
@@ -392,6 +402,7 @@ void SettingsDialog::ApplyMarkerPeak() {
     fsuMeasurement::MarkerPeakSettings settings{};
     settings.startFreq = startFreq;
     settings.stopFreq  = stopFreq;
+    settings.targetFreq = targetFreq;
     settings.refLevel  = refLevel;
     settings.att       = m_spinAttenuation->GetValue();
     settings.unit      = m_choiceUnit->GetStringSelection().ToStdString();
@@ -460,6 +471,10 @@ void SettingsDialog::RefreshData()
             m_txtStartFreq    ->SetToolTip(FormatFrequencyAutoUnit(s.startFreq));
             m_txtStopFreq     ->SetValue(wxString::Format(wxT("%.0f"),s.stopFreq));
             m_txtStopFreq     ->SetToolTip(FormatFrequencyAutoUnit(s.stopFreq));
+            if (m_txtTargetFreq) {
+                m_txtTargetFreq->SetValue(wxString::Format(wxT("%.0f"), s.targetFreq));
+                m_txtTargetFreq->SetToolTip(FormatFrequencyAutoUnit(s.targetFreq));
+            }
             m_txtRefLevel     ->SetValue(wxString::Format(wxT("%.0f"),s.refLevel));
             m_spinAttenuation ->SetValue(s.att);
             m_choiceUnit      ->SetStringSelection(s.unit);
@@ -532,6 +547,7 @@ void SettingsDialog::LoadPresetData()
         {
             if (m_txtStartFreq)      m_txtStartFreq->SetValue(wxString::Format(wxT("%.0f"), s.startFreq));
             if (m_txtStopFreq)       m_txtStopFreq->SetValue(wxString::Format(wxT("%.0f"), s.endFreq));
+            if (m_txtTargetFreq)     m_txtTargetFreq->SetValue(wxString::Format(wxT("%.0f"), s.targetFreq));
             if (m_txtRefLevel)       m_txtRefLevel->SetValue(wxString::Format(wxT("%.0f"), s.refPegel));
             if (m_spinAttenuation)   m_spinAttenuation->SetValue(s.HFDaempfung);
             if (m_choiceUnit && !s.ampUnit.empty())

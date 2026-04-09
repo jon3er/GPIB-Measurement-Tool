@@ -19,7 +19,8 @@ sData::sData(const char* type)
     m_dsParam->NoPoints_Array = 1;
     m_dsParam->ampUnit = "DB";
     m_dsParam->startFreq = 0;
-    m_dsParam->endFreq = 100000;
+    m_dsParam->endFreq = 100'000;
+    m_dsParam->targetFreq = 50'000;
     //get time
     setTimeAndDate();
     //test values
@@ -69,25 +70,21 @@ std::vector<double> sData::GetFreqStepVector()
 {
     std::vector<double> freqSteps;
 
-    double endFreq = double(m_dsParam->endFreq);
-    double startFreq = double(m_dsParam->startFreq);
-    double ArrayPts = double(m_dsParam->NoPoints_Array);
-    double step;
+    const double endFreq = static_cast<double>(m_dsParam->endFreq);
+    const double startFreq = static_cast<double>(m_dsParam->startFreq);
+    const int arrayPts = std::max(1, m_dsParam->NoPoints_Array);
 
-    try
+    if (arrayPts == 1)
     {
-        step = (endFreq - startFreq) / (ArrayPts-1);
+        const double singleFreq = (m_dsParam->targetFreq > 0.0) ? m_dsParam->targetFreq : startFreq;
+        freqSteps.push_back(singleFreq);
+        return freqSteps;
     }
-    catch(const std::exception& e)
-    {
-        std::cerr << e.what() << '\n';
-    }
+
+    const double step = (endFreq - startFreq) / static_cast<double>(arrayPts - 1);
     double freq = startFreq;
 
-    std::cout << step << std::endl;
-
-
-    for (size_t i = 0; i < ArrayPts; i++)
+    for (int i = 0; i < arrayPts; i++)
     {
         freqSteps.push_back(freq);
         freq += step;
@@ -205,6 +202,7 @@ void sData::applyFsuSettingsToParam()
             m_dsParam->MeasurementType = "Marker Peak";
             m_dsParam->startFreq   = s.startFreq;
             m_dsParam->endFreq     = s.stopFreq;
+            m_dsParam->targetFreq  = s.targetFreq;
             m_dsParam->refPegel    = s.refLevel;
             m_dsParam->HFDaempfung = s.att;
             m_dsParam->ampUnit     = s.unit;

@@ -313,6 +313,7 @@ bool CsvFile::saveCsvSettingsMarker(wxTextFile& file, sData& data)
     // Save current Marker-settings to File
     file.AddLine(wxString::FromUTF8(HeaderConfig::startFreq.data())     + m_separator + wxString::FromDouble(s.startFreq));
     file.AddLine(wxString::FromUTF8(HeaderConfig::endFreq.data())       + m_separator + wxString::FromDouble(s.stopFreq));
+    file.AddLine(wxString::FromUTF8(HeaderConfig::targetFreq.data())    + m_separator + wxString::FromDouble(s.targetFreq));
     file.AddLine(wxString::FromUTF8(HeaderConfig::refPegel.data())      + m_separator + wxString::FromDouble(s.refLevel));
     file.AddLine(wxString::FromUTF8(HeaderConfig::HFDaempfung.data())   + m_separator + wxString::Format("%i", s.att));
     file.AddLine(wxString::FromUTF8(HeaderConfig::ampUnit.data())       + m_separator + s.unit);
@@ -731,6 +732,18 @@ bool CsvFile::readCsvSettingsMarker(wxTextFile& file, sData& data)
     if (endVal.ToLong(&freqVal))    dsParam->endFreq   = freqVal;
     settings.marker.startFreq = dsParam->startFreq;
     settings.marker.stopFreq = dsParam->endFreq;
+
+    double targetFreq = 0.0;
+    wxString targetVal = readLine(HeaderConfig::targetFreq).BeforeFirst(' ');
+    if (targetVal.ToDouble(&targetFreq))
+    {
+        dsParam->targetFreq = targetFreq;
+    }
+    else
+    {
+        dsParam->targetFreq = dsParam->startFreq;
+    }
+    settings.marker.targetFreq = dsParam->targetFreq;
 
     long lVal;
     if (readLine(HeaderConfig::refPegel).ToLong(&lVal))

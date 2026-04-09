@@ -92,6 +92,7 @@ public:
         // Frequenz
         double          startFreq;
         double          endFreq;
+        double          targetFreq;
         double          centerFreq;
         double          spanFreq;
         // Amplitude und Pegel
