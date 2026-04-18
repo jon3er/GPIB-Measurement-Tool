@@ -71,7 +71,7 @@ bool CsvFile::saveCsvFile(wxString& filename, sData& data, int mesurementNumb)
         }
         std::cout << "write matrix" << std::endl;
         // Write indexes
-        if (!writeMatrixIndexCsv(file, data, cont))
+        if (!writeMatrixIndexCsv(file, data, false)) // Set to false to always write index in order
         {
             std::cout << kErrPrefixStr.CsvSave <<"Failed to write indexes" << std::endl;
             return false;

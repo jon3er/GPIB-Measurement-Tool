@@ -43,6 +43,7 @@ public:
     bool ApplyIq(const fsuMeasurement::IqSettings& settings);
     bool ApplyMarkerPeak(const fsuMeasurement::MarkerPeakSettings& settings);
 
+    void setMeasurementDevToMode();
     bool ReadCurrent();
 
 private:
@@ -53,6 +54,7 @@ private:
     bool VerifyString(const std::string& name, const std::string& written, const std::string& readback, std::string& mismatches) const;
 
     void SetResult(bool success, bool startEnabled, const std::string& message);
+    
     void RefreshCachedSettings();
 
     PrologixUsbGpibAdapter& m_adapter;

@@ -198,12 +198,15 @@ SettingsDialog::SettingsDialog(wxWindow* parent, MeasurementMode mode, const sDa
     BuildCommonFields(panel, grid, floatVal);
     if (m_mode == MeasurementMode::SWEEP || m_mode == MeasurementMode::MARKER_PEAK) {
         BuildSweepMarkerFields(panel, grid);
+        m_document->setMeasurementDevToMode();
     }
     if (m_mode == MeasurementMode::SWEEP) {
         BuildSweepFields(panel, grid);
+        m_document->setMeasurementDevToMode();
     }
     if (m_mode == MeasurementMode::IQ) {
         BuildIqFields(panel, grid, floatVal);
+        m_document->setMeasurementDevToMode();
     }
     BuildBottomOptions(panel, grid);
 

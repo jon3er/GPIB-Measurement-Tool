@@ -400,3 +400,8 @@ bool MSetDocument::ReadCurrent()
     SetResult(true, true, "Einstellungen vom Messgeraet geladen.");
     return true;
 }
+void MSetDocument::setMeasurementDevToMode()
+{
+    fsuMeasurement::get_instance().setMeasurementDevToMode();
+}
+

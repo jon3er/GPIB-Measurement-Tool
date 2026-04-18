@@ -64,6 +64,7 @@ bool fsuMeasurement::executeMeasurement(int TimeOutMs)
     switch (m_lastMeasurementMode)
     {
     case MeasurementMode::SWEEP:
+        adapter.write("INST:SEL SAN"); // select sweep mode
         adapter.write("INIT:CONT OFF"); // turn of continous measurement
         adapter.write("FORM ASC");
         adapter.write("INIT:IMM");      // trigger measurement
@@ -100,7 +101,7 @@ bool fsuMeasurement::executeMeasurement(int TimeOutMs)
         break;
 
     case MeasurementMode::IQ:
-        adapter.write("INST:SEL SAN");
+        adapter.write("INST:SEL IQ"); // select IQ mode
         adapter.write("TRAC:IQ:STAT ON");
         // adapter.write("INIT:CONT OFF"); // check why it tells me 
         adapter.write("INIT:IMM");
@@ -134,10 +135,12 @@ bool fsuMeasurement::executeMeasurement(int TimeOutMs)
         break;
 
     case MeasurementMode::MARKER_PEAK:
+        adapter.write("INST:SEL SAN"); // select sweep mode for marker peak measurement
+        adapter.write("TRAC:IQ:STAT OFF");
         adapter.write("INIT:CONT OFF"); // turn off continous measurement
         adapter.write("INIT:IMM");
         adapter.write("*WAI");          // wait for measurement to finish
-        adapter.write("CALC:MARK1:ON");
+        //adapter.write("CALC:MARK1:STAT ON");
 
         // if Set Frequenzy out if range set it to the min frequenzy
         {
@@ -151,7 +154,7 @@ bool fsuMeasurement::executeMeasurement(int TimeOutMs)
                 m_lastMarkerPeakSettings.targetFreq = targetFreq;
             }
 
-            adapter.write("CALC:MARK1:X " + std::format("{}", targetFreq));
+            adapter.write("CALC:MARK1:X " + std::format("{:.0f}", targetFreq));
             std::cout << "Marker Measurement Triggered at target frequency: " << targetFreq << " Hz" << std::endl;
         }
 
@@ -283,6 +286,26 @@ void fsuMeasurement::setFreqStartEnd(unsigned int FreqS, unsigned int FreqE)
 {
     m_FreqStart = FreqS;
     m_FreqEnd = FreqE;
+}
+
+void fsuMeasurement::setMeasurementDevToMode()
+{
+
+    auto& adapter = PrologixUsbGpibAdapter::get_instance();
+    switch (m_lastMeasurementMode)
+    {
+    case MeasurementMode::SWEEP:
+        adapter.write("INST:SEL SAN"); // select sweep mode
+        break;
+    case MeasurementMode::IQ:
+        adapter.write("INST:SEL IQ"); // select IQ mode
+        break;
+    case MeasurementMode::MARKER_PEAK:
+        adapter.write("INST:SEL SAN"); // select sweep mode
+        break;
+    default:
+        break;
+    }
 }
 
 bool fsuMeasurement::checkIfSettingsValid(ScpiCommand command, const SettingValue& value)

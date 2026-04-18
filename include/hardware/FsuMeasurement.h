@@ -92,6 +92,7 @@ public:
     void setFileName(wxString name) { m_fileNameCustomMeasurement = name; };
     
     void setMeasurementMode(MeasurementMode mode) { m_lastMeasurementMode = mode; };
+    void setMeasurementDevToMode();
 
     // Check If last measurement had Imag Values
     bool isImagValues() { return m_ImagValues; };
