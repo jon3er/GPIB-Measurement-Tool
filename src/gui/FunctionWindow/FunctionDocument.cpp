@@ -4,6 +4,7 @@
 
 #include <algorithm>
 #include <ctime>
+#include <filesystem>
 #include <iostream>
 #include <random>
 
@@ -224,7 +225,13 @@ void FunctionDocument::TestSaveFile()
     sData::sParam* TestData = TestObjekt.GetParameter();
     std::cerr << "Zeit: " << TestData->Time << std::endl;
 
-    wxString Dateiname = System::filePathRoot + "LogFiles" + System::fileSystemSlash + "TestCSVNeu";
+    wxString logDir = System::filePathRoot + "LogFiles";
+    if (!std::filesystem::exists(logDir.ToStdWstring()))
+    {
+        std::filesystem::create_directories(logDir.ToStdWstring());
+    }
+
+    wxString Dateiname = logDir + System::fileSystemSlash + "TestCSVNeu";
 
     int messungen = TestObjekt.getNumberOfPts_X() * TestObjekt.getNumberOfPts_Y();
     for (int i = 1; i <= messungen; i++)

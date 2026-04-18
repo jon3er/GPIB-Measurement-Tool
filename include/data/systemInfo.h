@@ -2,6 +2,7 @@
 
 #include <wx/wx.h>
 #include <wx/filename.h>
+#include <filesystem>
 #include <unordered_map>
 #include "mathplot.h"
 #include "dataManagement.h"
@@ -50,6 +51,18 @@ namespace System
     inline wxString filePathRoot = GetProjectRoot();
     inline wxString filePathSystem = GetProjectRoot() + "GpibScripts" + wxFileName::GetPathSeparator();
     inline wxString fileSystemSlash = wxFileName::GetPathSeparator();
+
+    inline wxString GetLogsPath()
+    {
+        wxString logDir = filePathRoot + "LogFiles";
+        if (!std::filesystem::exists(logDir.ToStdWstring()))
+        {
+            std::filesystem::create_directories(logDir.ToStdWstring());
+        }
+        return EnsureTrailingSeparator(logDir);
+    }
+    
+    inline wxString filePathLogs = GetLogsPath();
 }
 
 // ID for main Window menu bar
