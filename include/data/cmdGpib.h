@@ -211,7 +211,7 @@ static std::unordered_map<ScpiCommand, std::string> scpiSetCommands = {
     {ScpiCommand::IQ_IF_BANDWIDTH,   "TRAC:IQ:BWID "},
     {ScpiCommand::TRIGGER_SOURCE,    "TRIG:SOUR "},     // TRIGGER Einstellung
     {ScpiCommand::TRIGGER_LEVEL,     "TRIG:LEV:IFP "},
-    {ScpiCommand::TRIGGER_DELAY,     "TRIG:DEL "}
+    {ScpiCommand::TRIGGER_DELAY,     "TRIG:OFFS "}
 };
 
 // Map für QUERY-Befehle (gleiche Reihenfolge/Keys)
@@ -234,5 +234,5 @@ static std::unordered_map<ScpiCommand, std::string> scpiQueryCommands = {
     {ScpiCommand::IQ_IF_BANDWIDTH,   "TRAC:IQ:BWID?"},
     {ScpiCommand::TRIGGER_SOURCE,    "TRIG:SOUR?"},
     {ScpiCommand::TRIGGER_LEVEL,     "TRIG:LEV:IFP?"},
-    {ScpiCommand::TRIGGER_DELAY,     "TRIG:DEL?"}
+    {ScpiCommand::TRIGGER_DELAY,     "TRIG:OFFS?"}
 };

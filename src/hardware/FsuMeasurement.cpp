@@ -101,7 +101,6 @@ bool fsuMeasurement::executeMeasurement(int TimeOutMs)
         break;
 
     case MeasurementMode::IQ:
-        adapter.write("INST:SEL IQ"); // select IQ mode
         adapter.write("TRAC:IQ:STAT ON");
         // adapter.write("INIT:CONT OFF"); // check why it tells me 
         adapter.write("INIT:IMM");
@@ -126,6 +125,7 @@ bool fsuMeasurement::executeMeasurement(int TimeOutMs)
                 setErrorMessage("IQ: timeout while receiving data");
                 // adapter.write("INIT:CONT ON"); // turn on continous measurement
                 adapter.write("++auto 1");
+                std::cout << "Received Before Timeout " << adapter.read() << std::endl;
                 return false;
             }
 
@@ -295,13 +295,16 @@ void fsuMeasurement::setMeasurementDevToMode()
     switch (m_lastMeasurementMode)
     {
     case MeasurementMode::SWEEP:
-        adapter.write("INST:SEL SAN"); // select sweep mode
+        adapter.write("TRAC:IQ:STAT OFF"); // select sweep mode
+        adapter.write("*WAI");
         break;
     case MeasurementMode::IQ:
-        adapter.write("INST:SEL IQ"); // select IQ mode
+        adapter.write("TRAC:IQ:STAT ON"); // select IQ mode
+        adapter.write("*WAI");
         break;
     case MeasurementMode::MARKER_PEAK:
-        adapter.write("INST:SEL SAN"); // select sweep mode
+        adapter.write("TRAC:IQ:STAT OFF"); // select sweep mode
+        adapter.write("*WAI");
         break;
     default:
         break;
@@ -703,7 +706,7 @@ bool fsuMeasurement::readMarkerPeakSettings()
 void fsuMeasurement::setErrorMessage(std::string error)
 {
     m_lastError = error;
-    std::cout << terminalTimestampOutput << m_lastError << std::endl;
+    std::cout << terminalTimestampOutput(m_lastError)  << std::endl;
 }
 
 // estimate Time sweep will take for different settings

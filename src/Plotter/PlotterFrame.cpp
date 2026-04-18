@@ -127,7 +127,15 @@ void PlotterFrame::EnsureLivePlotWindow()
         return;
     }
 
-    m_livePlotWindow = new PlotWindow(this, nullptr);
+    // Use the app top window (Main window) as parent so PlotWindow menu forwarding
+    // to MainProgrammWin works when opened from the plotter scan path.
+    wxWindow* plotParent = GetParent();
+    if (!plotParent && wxTheApp)
+        plotParent = wxDynamicCast(wxTheApp->GetTopWindow(), wxWindow);
+    if (!plotParent)
+        plotParent = this;
+
+    m_livePlotWindow = new PlotWindow(plotParent, nullptr);
     m_livePlotWindow->SetDocument(m_measurementDoc);
     m_livePlotWindow->SetOwnsDocument(false);
     m_livePlotWindow->Bind(wxEVT_DESTROY, [this](wxWindowDestroyEvent& evt) {

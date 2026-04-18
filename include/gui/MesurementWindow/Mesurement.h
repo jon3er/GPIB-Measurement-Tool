@@ -40,6 +40,7 @@ public:
 
     /** Attach / detach document. Registers/unregisters this as observer. */
     void SetDocument(MeasurementDocument* doc);
+    MeasurementDocument* GetDocument() const { return m_document; }
 
     /** Set document ownership: if true, this window deletes the document on close. */
     void SetOwnsDocument(bool owns) { m_ownsDocument = owns; }

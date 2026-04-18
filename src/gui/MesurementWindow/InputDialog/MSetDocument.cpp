@@ -41,6 +41,7 @@ MSetDocument::MSetDocument(PrologixUsbGpibAdapter& adapter, fsuMeasurement& fsu,
     , m_fsu(fsu)
     , m_mode(mode)
 {
+    fsuMeasurement::get_instance().setMeasurementMode(mode); // Update the current mode
     RefreshCachedSettings();
 }
 

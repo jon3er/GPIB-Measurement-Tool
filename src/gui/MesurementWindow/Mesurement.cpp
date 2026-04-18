@@ -7,6 +7,23 @@
 
 #include <algorithm>
 
+namespace {
+bool syncPlotDataToMainDocument(PlotWindow* window, MainProgrammWin* parent)
+{
+    if (!window || !parent)
+        return false;
+
+    MainDocument* mainDoc = parent->GetDocument();
+    MeasurementDocument* plotDoc = window->GetDocument();
+
+    if (!mainDoc || !plotDoc)
+        return false;
+
+    mainDoc->GetData() = plotDoc->GetResultsMutable();
+    return true;
+}
+}
+
 
 int PlotWindow::s_windowCounter = 0;
 
@@ -902,7 +919,10 @@ void PlotWindow::OnMenuFileSave(wxCommandEvent& event)
     // Forward to parent MainProgrammWin
     MainProgrammWin* parent = dynamic_cast<MainProgrammWin*>(GetParent());
     if (parent)
+    {
+        syncPlotDataToMainDocument(this, parent);
         parent->MenuFileSave(event);
+    }
 }
 
 void PlotWindow::OnMenuFileSaveAs(wxCommandEvent& event)
@@ -910,7 +930,10 @@ void PlotWindow::OnMenuFileSaveAs(wxCommandEvent& event)
     // Forward to parent MainProgrammWin
     MainProgrammWin* parent = dynamic_cast<MainProgrammWin*>(GetParent());
     if (parent)
+    {
+        syncPlotDataToMainDocument(this, parent);
         parent->MenuFileSaveAs(event);
+    }
 }
 
 void PlotWindow::OnMenuFileExit(wxCommandEvent& event)
