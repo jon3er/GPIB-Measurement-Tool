@@ -105,7 +105,7 @@ void GrblScanWindow::OnStart(wxCommandEvent& event) {
             m_workerThread.join();
         }
 
-        double startX = std::stod(m_txtStartX->GetValue().ToStdString())/10;
+        double startX = std::stod(m_txtStartX->GetValue().ToStdString())/10; // div by 10 to get mm
         double startY = std::stod(m_txtStartY->GetValue().ToStdString())/10;
         int rows = std::stoi(m_txtRows->GetValue().ToStdString());
         int cols = std::stoi(m_txtCols->GetValue().ToStdString());
