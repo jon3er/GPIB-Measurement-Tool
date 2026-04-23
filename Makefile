@@ -44,8 +44,8 @@ ifeq ($(OS),Windows_NT)
     FTDI_INCLUDE = $(THIRD_PARTY_DIR)/FTDI
     FTDI_LIB = $(THIRD_PARTY_DIR)/FTDI/ftd2xx.lib
 else
-    FTDI_INCLUDE = /usr/include
-    FTDI_LIB = -lftd2xx
+    FTDI_INCLUDE = $(THIRD_PARTY_DIR)/FTDI
+    FTDI_LIB = $(THIRD_PARTY_DIR)/FTDI/libftd2xx.so
 	ifeq ($(wildcard $(FTDI_INCLUDE)/ftd2xx.h),)
 $(error FTDI header not found at $(FTDI_INCLUDE)/ftd2xx.h)
 	endif
