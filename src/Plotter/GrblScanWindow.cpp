@@ -105,12 +105,12 @@ void GrblScanWindow::OnStart(wxCommandEvent& event) {
             m_workerThread.join();
         }
 
-        double startX = std::stod(m_txtStartX->GetValue().ToStdString());
-        double startY = std::stod(m_txtStartY->GetValue().ToStdString());
+        double startX = std::stod(m_txtStartX->GetValue().ToStdString())/10;
+        double startY = std::stod(m_txtStartY->GetValue().ToStdString())/10;
         int rows = std::stoi(m_txtRows->GetValue().ToStdString());
         int cols = std::stoi(m_txtCols->GetValue().ToStdString());
-        double stepX = std::stod(m_txtStepX->GetValue().ToStdString());
-        double stepY = std::stod(m_txtStepY->GetValue().ToStdString());
+        double stepX = std::stod(m_txtStepX->GetValue().ToStdString())/10;
+        double stepY = std::stod(m_txtStepY->GetValue().ToStdString())/10;
         double speed = std::stod(m_txtSpeed->GetValue().ToStdString());
         Direction dir = (m_rbDirection->GetSelection() == 0) ? DIR_Horizontal : DIR_Vertical;
         bool zigzag = m_chkZigzag->GetValue();
